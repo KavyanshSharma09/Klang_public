@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Klang Documentation</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #f6fffd;
+    --bg2: #eaf8f5;
+    --card: #ffffff;
+    --border: #c8e5df;
+    --accent: #0f9faa;
+    --accent2: #14b8a6;
+    --text: #0f3f46;
+    --muted: #5f8186;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: radial-gradient(circle at 85% 0%, #dff8f4 0%, transparent 38%), var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+  }
+
+  .wrap {
+    width: min(1100px, 92vw);
+    margin: 0 auto;
+    padding: 32px 0 48px;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .logo {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -1px;
+    text-decoration: none;
+  }
+
+  .logo span { color: var(--text); }
+
+  .home-link {
+    text-decoration: none;
+    color: #ffffff;
+    background: var(--accent);
+    padding: 10px 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    border-radius: 10px;
+  }
+
+  .hero {
+    background: linear-gradient(130deg, rgba(15,159,170,0.12), rgba(20,184,166,0.05));
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 28px;
+    margin-bottom: 18px;
+  }
+
+  h1 {
+    font-size: clamp(34px, 5vw, 54px);
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+
+  .sub {
+    color: var(--muted);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  .docs-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .doc-card {
+    border: 1px solid var(--border);
+    background: var(--card);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .doc-head {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+
+  .doc-title {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.4px;
+  }
+
+  .doc-open {
+    text-decoration: none;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .doc-open:hover { color: var(--accent); }
+
+  pre {
+    margin: 0;
+    padding: 20px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.65;
+    color: #1a4f55;
+    background: #fbfffe;
+    min-height: 120px;
+  }
+
+  .loading {
+    color: var(--muted);
+  }
+
+  .error {
+    color: #a63030;
+  }
+
+  @media (max-width: 720px) {
+    .topbar {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .home-link {
+      width: 100%;
+      text-align: center;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a href="./index.html" class="logo">K<span>lang</span></a>
+      <a href="./index.html#community" class="home-link">Back to Home</a>
+    </div>
+
+    <section class="hero">
+      <h1>Documentation</h1>
+      <p class="sub">This page presents the primary project documentation from the repository root and the language core directory.</p>
+    </section>
+
+    <section class="docs-grid">
+      <article class="doc-card">
+        <header class="doc-head">
+          <div class="doc-title">README.md (workspace root)</div>
+          <a class="doc-open" href="./README.md" target="_blank">Open raw</a>
+        </header>
+        <pre id="doc-root" class="loading">Loading README.md...</pre>
+      </article>
+
+      <article class="doc-card">
+        <header class="doc-head">
+          <div class="doc-title">klang/README.md</div>
+          <a class="doc-open" href="./klang/README.md" target="_blank">Open raw</a>
+        </header>
+        <pre id="doc-klang" class="loading">Loading klang/README.md...</pre>
+      </article>
+    </section>
+  </div>
+
+<script>
+  async function loadText(path, elementId) {
+    const el = document.getElementById(elementId);
+    try {
+      const response = await fetch(path, { cache: 'no-store' });
+      if (!response.ok) {
+        throw new Error('HTTP ' + response.status + ' while loading ' + path);
+      }
+
+      const text = await response.text();
+      el.classList.remove('loading');
+      el.textContent = text;
+    } catch (error) {
+      el.classList.remove('loading');
+      el.classList.add('error');
+      el.textContent = 'Could not load ' + path + '.\n' + String(error);
+    }
+  }
+
+  loadText('./README.md', 'doc-root');
+  loadText('./klang/README.md', 'doc-klang');
+</script>
+</body>
+</html>

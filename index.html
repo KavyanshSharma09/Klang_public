@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Klang — Practical. Clean. Reliable.</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #f6fffd;
+    --bg2: #eaf8f5;
+    --card: #ffffff;
+    --border: #c8e5df;
+    --accent: #0f9faa;
+    --accent2: #14b8a6;
+    --accent3: #d94f4f;
+    --text: #0f3f46;
+    --muted: #5f8186;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: radial-gradient(circle at 85% 0%, #dff8f4 0%, transparent 38%), var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s, width 0.2s, height 0.2s, opacity 0.2s;
+    box-shadow: 0 0 18px rgba(15, 159, 170, 0.35);
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1px solid rgba(15, 159, 170, 0.45);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.15s ease-out, width 0.3s, height 0.3s;
+  }
+
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.14;
+  }
+
+  /* Nav */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 20px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid transparent;
+    transition: all 0.3s;
+  }
+  nav.scrolled {
+    background: rgba(246, 255, 253, 0.92);
+    backdrop-filter: blur(20px);
+    border-bottom-color: var(--border);
+  }
+  .logo {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -1px;
+    text-decoration: none;
+  }
+  .logo span { color: var(--text); }
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+
+  .nav-cta {
+    background: var(--accent);
+    color: #ffffff;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px 22px;
+    border: none;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+  .nav-cta:hover {
+    background: #0b8691;
+    transform: translateY(-1px);
+  }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding: 120px 60px 80px;
+    overflow: hidden;
+  }
+
+  /* Grid background */
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(15,159,170,0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(15,159,170,0.1) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%);
+  }
+
+  /* Glow blobs */
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.22;
+    pointer-events: none;
+  }
+  .blob-1 {
+    width: 600px; height: 600px;
+    background: var(--accent);
+    top: -200px; right: -100px;
+    animation: float 8s ease-in-out infinite;
+  }
+  .blob-2 {
+    width: 400px; height: 400px;
+    background: var(--accent2);
+    bottom: -100px; left: 100px;
+    animation: float 10s ease-in-out infinite reverse;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(-30px) scale(1.05); }
+  }
+
+  .hero-content {
+    max-width: 900px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(15,159,170,0.08);
+    border: 1px solid rgba(15,159,170,0.24);
+    padding: 6px 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 1px;
+    margin-bottom: 32px;
+    animation: fadeUp 0.6s ease both;
+  }
+  .badge-dot {
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .hero-title {
+    font-size: clamp(64px, 9vw, 130px);
+    font-weight: 800;
+    line-height: 0.9;
+    letter-spacing: -4px;
+    margin-bottom: 32px;
+    animation: fadeUp 0.6s ease 0.1s both;
+  }
+  .hero-title .line-1 { display: block; color: var(--text); }
+  .hero-title .line-2 {
+    display: block;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: 18px;
+    color: var(--muted);
+    max-width: 540px;
+    line-height: 1.6;
+    font-weight: 400;
+    margin-bottom: 48px;
+    animation: fadeUp 0.6s ease 0.2s both;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    animation: fadeUp 0.6s ease 0.3s both;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--accent);
+    color: #ffffff;
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 700;
+    padding: 16px 32px;
+    text-decoration: none;
+    border: none;
+    cursor: none;
+    clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
+    transform: translateX(-100%);
+    transition: transform 0.4s;
+  }
+  .btn-primary:hover::before { transform: translateX(100%); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 38px rgba(15,159,170,0.3); }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: transparent;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    padding: 15px 32px;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    cursor: none;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover {
+    border-color: rgba(15,159,170,0.45);
+    color: var(--accent);
+    background: rgba(15,159,170,0.08);
+  }
+
+  .hero-stats {
+    position: absolute;
+    right: 60px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    animation: fadeUp 0.6s ease 0.4s both;
+    z-index: 2;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 20px 28px;
+    text-align: right;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--accent);
+  }
+  .stat-num {
+    font-family: var(--mono);
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 4px;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Code window */
+  .code-section {
+    padding: 100px 60px;
+    background: var(--bg2);
+    position: relative;
+  }
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-size: clamp(36px, 4vw, 56px);
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 60px;
+  }
+
+  .code-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    max-width: 1100px;
+  }
+
+  .code-window {
+    background: var(--card);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .code-window:hover {
+    border-color: rgba(15,159,170,0.4);
+    transform: translateY(-4px);
+  }
+  .window-bar {
+    background: #f0faf8;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #ff5f57; }
+  .dot-y { background: #febc2e; }
+  .dot-g { background: #28c840; }
+  .window-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-left: 8px;
+  }
+  .code-body {
+    padding: 24px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.8;
+    overflow-x: auto;
+  }
+  .code-body .comment { color: #729196; }
+  .code-body .keyword { color: #0f7f8a; }
+  .code-body .func { color: #0f9faa; }
+  .code-body .str { color: #c55d1f; }
+  .code-body .num { color: #7c4dd8; }
+  .code-body .out { color: var(--accent3); }
+
+  /* Features */
+  .features {
+    padding: 100px 60px;
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: 60px;
+  }
+  .feature-card {
+    background: var(--card);
+    padding: 40px 36px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+    border: 1px solid var(--border);
+  }
+  .feature-card:hover { background: #f1fbf8; }
+  .feature-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+  .feature-card:hover::after { transform: scaleX(1); }
+  .feature-icon {
+    width: 48px; height: 48px;
+    background: rgba(15,159,170,0.08);
+    border: 1px solid rgba(15,159,170,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 24px;
+  }
+  .feature-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+  .feature-desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* Download */
+  .download {
+    padding: 100px 60px;
+    background: var(--bg2);
+    position: relative;
+    overflow: hidden;
+  }
+  .download::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px; height: 800px;
+    background: radial-gradient(circle, rgba(15,159,170,0.12) 0%, transparent 72%);
+    pointer-events: none;
+  }
+
+  .download-inner {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+  }
+  .download-title {
+    font-size: clamp(40px, 5vw, 72px);
+    font-weight: 800;
+    letter-spacing: -3px;
+    line-height: 1;
+    margin-bottom: 20px;
+  }
+  .download-sub {
+    font-size: 16px;
+    color: var(--muted);
+    margin-bottom: 60px;
+    line-height: 1.6;
+  }
+  .download-note {
+    margin-top: 18px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .install-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  .install-cmd {
+    font-family: var(--mono);
+    font-size: 15px;
+    color: var(--accent);
+  }
+  .copy-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 8px 16px;
+    cursor: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .copy-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(15,159,170,0.08);
+  }
+
+  .download-btn-wrap {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .dl-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 40px;
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: none;
+    transition: all 0.25s;
+    border: 1px solid;
+  }
+  .dl-btn-win {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+    clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+  }
+  .dl-btn-win:hover {
+    background: #0b8691;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 38px rgba(15,159,170,0.32);
+  }
+
+  /* Benchmark */
+  .bench {
+    padding: 100px 60px;
+  }
+  .bench-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 60px;
+    font-family: var(--mono);
+    font-size: 14px;
+  }
+  .bench-table th {
+    text-align: left;
+    padding: 16px 24px;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+  .bench-table td {
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(95,129,134,0.24);
+    vertical-align: middle;
+  }
+  .bench-table tr:hover td { background: var(--card); }
+  .td-test { color: var(--text); font-weight: 700; }
+  .td-py { color: var(--accent3); }
+  .td-kl { color: var(--accent); }
+  .speedup-badge {
+    display: inline-block;
+    background: rgba(15,159,170,0.1);
+    border: 1px solid rgba(15,159,170,0.26);
+    color: var(--accent);
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  /* Community */
+  .community {
+    padding: 100px 60px;
+    background: var(--bg2);
+    text-align: center;
+  }
+  .community-title {
+    font-size: clamp(40px, 5vw, 64px);
+    font-weight: 800;
+    letter-spacing: -2px;
+    margin-bottom: 16px;
+  }
+  .community-sub {
+    color: var(--muted);
+    font-size: 16px;
+    margin-bottom: 60px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 60px;
+    line-height: 1.6;
+  }
+  .community-links {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .comm-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 28px 40px;
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-weight: 600;
+    font-size: 16px;
+    min-width: 200px;
+  }
+  .comm-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+    background: #f1fbf8;
+  }
+  .comm-icon { font-size: 24px; }
+
+  /* Footer */
+  footer {
+    padding: 48px 60px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .footer-left { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+  .footer-left span { color: var(--accent); }
+  .footer-right {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: #edf8f5; }
+  ::-webkit-scrollbar-thumb { background: #bcded8; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+  @media (max-width: 900px) {
+    nav { padding: 20px 24px; }
+    .nav-links { display: none; }
+    .hero { padding: 120px 24px 80px; flex-direction: column; }
+    .hero-stats { position: static; transform: none; flex-direction: row; flex-wrap: wrap; margin-top: 48px; }
+    .code-section, .features, .download, .bench, .community { padding: 60px 24px; }
+    .code-grid { grid-template-columns: 1fr; }
+    .features-grid { grid-template-columns: 1fr; }
+    footer { padding: 32px 24px; flex-direction: column; gap: 16px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="logo">K<span>lang</span></a>
+  <ul class="nav-links">
+    <li><a href="#syntax">Syntax</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#community">Community</a></li>
+  </ul>
+  <a href="#download" class="nav-cta">Download Setup 1.0.1</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <div class="badge-dot"></div>
+      VERSION 1.0.1 — OPEN SOURCE
+    </div>
+    <h1 class="hero-title">
+      <span class="line-1">Build with</span>
+      <span class="line-2">Confidence</span>
+    </h1>
+    <p class="hero-sub">Klang is a modern programming language focused on readable syntax, reliable tooling, and native execution options for practical development.</p>
+    <div class="hero-actions">
+      <a href="#download" class="btn-primary">
+        ↓ Download Installer
+      </a>
+      <a href="https://github.com/KavyanshSharma09/Klang-version-0.1" target="_blank" class="btn-secondary">
+        ⭐ View on GitHub
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat-card">
+      <div class="stat-num">MIT</div>
+      <div class="stat-label">Open Source License</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">2</div>
+      <div class="stat-label">Execution Backends</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">CLI + IDE</div>
+      <div class="stat-label">Developer Workflow</div>
+    </div>
+  </div>
+</section>
+
+<!-- CODE EXAMPLES -->
+<section class="code-section" id="syntax">
+  <div class="section-label">// syntax</div>
+  <h2 class="section-title">Clean. Familiar.<br>Powerful.</h2>
+
+  <div class="code-grid">
+    <div class="code-window">
+      <div class="window-bar">
+        <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+        <span class="window-title">hello.kl</span>
+      </div>
+      <div class="code-body">
+        <span class="comment"># Variables & output</span><br>
+        x = <span class="num">5</span> + <span class="num">3</span><br>
+        y = x * <span class="num">2</span><br>
+        <span class="out">out</span> y<br><br>
+        <span class="comment"># For loop</span><br>
+        <span class="keyword">for</span> i = <span class="num">0</span> <span class="keyword">to</span> <span class="num">10</span>:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="out">out</span> i<br><br>
+        <span class="comment"># Condition</span><br>
+        <span class="keyword">if</span> x > <span class="num">5</span>:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="out">out</span> x<br>
+        <span class="keyword">else</span>:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="out">out</span> <span class="num">0</span>
+      </div>
+    </div>
+
+    <div class="code-window">
+      <div class="window-bar">
+        <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+        <span class="window-title">functions.kl</span>
+      </div>
+      <div class="code-body">
+        <span class="comment"># Define functions</span><br>
+        <span class="keyword">def</span> <span class="func">add</span>(a, b):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;result = a + b<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="out">out</span> result<br><br>
+        <span class="func">add</span>(<span class="num">5</span>, <span class="num">9</span>)<br><br>
+        <span class="comment"># Typical iterative pattern</span><br>
+        <span class="comment"># Clear and maintainable by design</span><br>
+        sum = <span class="num">0</span><br>
+        <span class="keyword">for</span> i = <span class="num">0</span> <span class="keyword">to</span> <span class="num">1000000000</span>:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;sum = sum + i<br>
+        <span class="out">out</span> sum
+      </div>
+    </div>
+
+    <div class="code-window">
+      <div class="window-bar">
+        <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+        <span class="window-title">input.kl</span>
+      </div>
+      <div class="code-body">
+        <span class="comment"># User input</span><br>
+        x = <span class="func">input</span>()<br>
+        <span class="out">out</span> x<br><br>
+        <span class="comment"># Factorial</span><br>
+        <span class="keyword">def</span> <span class="func">factorial</span>(n):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;result = <span class="num">1</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">for</span> i = <span class="num">1</span> <span class="keyword">to</span> n:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;result = result * i<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="out">out</span> result<br><br>
+        <span class="func">factorial</span>(<span class="num">15</span>)
+      </div>
+    </div>
+
+    <div class="code-window">
+      <div class="window-bar">
+        <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+        <span class="window-title">terminal</span>
+      </div>
+      <div class="code-body">
+        <span class="comment"># Run a program</span><br>
+        $ klang run hello.kl<br><br>
+        <span class="comment"># Compile to native</span><br>
+        $ klang build prog.kl -o app<br><br>
+        <span class="comment"># Choose backend</span><br>
+        $ klang run --backend llvm fib.kl<br>
+        $ klang run --backend vm fib.kl<br><br>
+        <span class="comment"># Launch IDE</span><br>
+        $ klang ide
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="section-label">// features</div>
+  <h2 class="section-title">Everything you need.<br>Nothing you don't.</h2>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">Multiple Backends</div>
+      <p class="feature-desc">Choose between VM bytecode and LLVM JIT/AOT. Match your performance needs to your toolchain.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🧠</div>
+      <div class="feature-title">Pattern Optimization</div>
+      <p class="feature-desc">The compiler can recognize recurring patterns and apply safe optimizations automatically during compilation.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📦</div>
+      <div class="feature-title">Native Executables</div>
+      <p class="feature-desc">Compile Klang programs to standalone .exe or binary files. Ship your app with no runtime dependency.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🖥️</div>
+      <div class="feature-title">Built-in IDE</div>
+      <p class="feature-desc">A Tkinter-based IDE ships with Klang out of the box. Write, run, and debug without leaving the environment.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔌</div>
+      <div class="feature-title">Simple Syntax</div>
+      <p class="feature-desc">If you know Python, you already know Klang. Clean indentation-based syntax with zero boilerplate.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🚀</div>
+      <div class="feature-title">Extensible Roadmap</div>
+      <p class="feature-desc">The project is structured for steady growth, with a focus on maintainability, ecosystem tooling, and long-term usability.</p>
+    </div>
+  </div>
+</section>
+
+<!-- OVERVIEW -->
+<section class="bench" id="overview">
+  <div class="section-label">// overview</div>
+  <h2 class="section-title">Project snapshot.</h2>
+  <table class="bench-table">
+    <thead>
+      <tr>
+        <th>Area</th>
+        <th>Status</th>
+        <th>Details</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="td-test">Language Core</td>
+        <td class="td-py">Stable</td>
+        <td class="td-kl">Variables, functions, conditionals, and loops</td>
+        <td><span class="speedup-badge">Ready for learning and prototyping</span></td>
+      </tr>
+      <tr>
+        <td class="td-test">Tooling</td>
+        <td class="td-py">Active</td>
+        <td class="td-kl">Command line workflows for parse, run, and build</td>
+        <td><span class="speedup-badge">Simple, scriptable interface</span></td>
+      </tr>
+      <tr>
+        <td class="td-test">Backends</td>
+        <td class="td-py">Available</td>
+        <td class="td-kl">VM bytecode and LLVM execution paths</td>
+        <td><span class="speedup-badge">Flexible by environment</span></td>
+      </tr>
+      <tr>
+        <td class="td-test">Distribution</td>
+        <td class="td-py">Windows Installer</td>
+        <td class="td-kl">Official setup package for quick onboarding</td>
+        <td><span class="speedup-badge">Cross-platform installers in progress</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- DOWNLOAD -->
+<section class="download" id="download">
+  <div class="download-inner">
+    <div class="section-label">// download</div>
+    <h2 class="download-title">Get Klang<br>in 60 seconds.</h2>
+    <p class="download-sub">Official installer is currently available for Windows only.</p>
+
+    <div class="install-box" id="install-win">
+      <span class="install-cmd">KlangSetup-1.0.1.exe</span>
+      <button class="copy-btn" onclick="copyCmd('KlangSetup-1.0.1.exe', this)">Copy</button>
+    </div>
+
+    <div class="download-btn-wrap">
+      <a href="./downloads/KlangSetup-1.0.1.exe" class="dl-btn dl-btn-win" download="KlangSetup-1.0.1.exe">
+        🪟 Download Windows Setup (.exe)
+      </a>
+    </div>
+    <p class="download-note">Windows-only release right now. Linux and macOS installers are not available yet.</p>
+    <p class="download-note">Hosting note: keep this page and the installer at /downloads/KlangSetup-1.0.1.exe on the same host.</p>
+  </div>
+</section>
+
+<!-- COMMUNITY -->
+<section class="community" id="community">
+  <div class="section-label">// community</div>
+  <h2 class="community-title">Join the community.</h2>
+  <p class="community-sub">Follow ongoing development on GitHub and access the complete project documentation in one place.</p>
+  <div class="community-links">
+    <a href="https://github.com/KavyanshSharma09/Klang-version-0.1" target="_blank" class="comm-card">
+      <span class="comm-icon">⭐</span> GitHub
+    </a>
+    <a href="./docs.html" class="comm-card">
+      <span class="comm-icon">📖</span> Docs
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">
+    <span>Klang</span> v1.0.1 — Built by KavyanshSharma09
+  </div>
+  <div class="footer-right">
+    Open Source · MIT License · Made with Rust + Python
+  </div>
+</footer>
+
+<script>
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  function animCursor() {
+    cursor.style.left = mx + 'px';
+    cursor.style.top = my + 'px';
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animCursor);
+  }
+  animCursor();
+
+  // Nav scroll
+  window.addEventListener('scroll', () => {
+    document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // Copy
+  function copyCmd(cmd, btn) {
+    navigator.clipboard.writeText(cmd).then(() => {
+      const orig = btn.textContent;
+      btn.textContent = 'Copied!';
+      btn.style.color = 'var(--accent)';
+      btn.style.borderColor = 'var(--accent)';
+      setTimeout(() => {
+        btn.textContent = orig;
+        btn.style.color = '';
+        btn.style.borderColor = '';
+      }, 2000);
+    });
+  }
+
+  // Scroll reveal
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.feature-card, .code-window, .stat-card, .comm-card').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease, background 0.3s, border-color 0.3s';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
